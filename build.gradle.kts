@@ -5,7 +5,6 @@ val serializationVersion = "1.2.1"
 val ktorVersion = "1.6.1"
 val logbackVersion = "1.2.3"
 val kmongoVersion = "4.2.7"
-val reactWrappersVersion = "17.0.2-pre.214-kotlin-1.5.20"
 
 plugins {
     kotlin("multiplatform") version "1.5.20"
@@ -24,11 +23,6 @@ repositories {
 kotlin {
     jvm {
         withJava()
-    }
-    js {
-        browser {
-            binaries.executable()
-        }
     }
     sourceSets {
         val commonMain by getting {
@@ -53,34 +47,11 @@ kotlin {
                 implementation("org.litote.kmongo:kmongo-coroutine-serialization:$kmongoVersion")
             }
         }
-
-        val jsMain by getting {
-            dependencies {
-                implementation("io.ktor:ktor-client-js:$ktorVersion")
-                implementation("io.ktor:ktor-client-json:$ktorVersion")
-                implementation("io.ktor:ktor-client-serialization:$ktorVersion")
-
-                implementation("org.jetbrains.kotlin-wrappers:kotlin-react:$reactWrappersVersion")
-                implementation("org.jetbrains.kotlin-wrappers:kotlin-react-dom:$reactWrappersVersion")
-            }
-        }
     }
 }
 
 application {
     mainClass.set("ServerKt")
-}
-
-// include JS artifacts in any JAR we generate
-tasks.getByName<Jar>("jvmJar") {
-    val taskName = if (project.hasProperty("isProduction")) {
-        "jsBrowserProductionWebpack"
-    } else {
-        "jsBrowserDevelopmentWebpack"
-    }
-    val webpackTask = tasks.getByName<KotlinWebpack>(taskName)
-    dependsOn(webpackTask) // make sure JS gets compiled first
-    from(File(webpackTask.destinationDirectory, webpackTask.outputFileName)) // bring output file along into the JAR
 }
 
 tasks {
