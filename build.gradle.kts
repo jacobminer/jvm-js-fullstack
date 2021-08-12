@@ -1,10 +1,8 @@
-import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpack
 
 val kotlinVersion = "1.5.20"
 val serializationVersion = "1.2.1"
 val ktorVersion = "1.6.1"
 val logbackVersion = "1.2.3"
-val kmongoVersion = "4.2.7"
 
 plugins {
     kotlin("multiplatform") version "1.5.20"
@@ -31,12 +29,6 @@ kotlin {
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
             }
         }
-        val commonTest by getting {
-            dependencies {
-                implementation(kotlin("test-common"))
-                implementation(kotlin("test-annotations-common"))
-            }
-        }
 
         val jvmMain by getting {
             dependencies {
@@ -44,7 +36,6 @@ kotlin {
                 implementation("io.ktor:ktor-server-core:$ktorVersion")
                 implementation("io.ktor:ktor-server-netty:$ktorVersion")
                 implementation("ch.qos.logback:logback-classic:$logbackVersion")
-                implementation("org.litote.kmongo:kmongo-coroutine-serialization:$kmongoVersion")
             }
         }
     }
