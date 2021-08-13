@@ -46,7 +46,7 @@ class LabelActionHandler(private val labelIdentifier: String) {
         )
 
         val otherRepoUrl = getCrossPostingRepoApiUrl(issue.url, otherRepoName) + "/issues"
-        GithubClient.postToUrl(Json.encodeToString(newIssue), otherRepoUrl)
+        GithubClient.postToUrl(otherRepoUrl, newIssue)
         println("LabelActionHandler: Created a new issue in $otherRepoName")
         call.respondText { "yay" }
     }
