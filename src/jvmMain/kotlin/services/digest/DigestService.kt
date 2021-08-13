@@ -11,8 +11,38 @@ import java.time.Duration
 import java.time.Instant
 
 object DigestService {
-//    private digestestableRepos: string[] = []
-//    private digestDeployTime = Number.MAX_SAFE_INTEGER
+    private val digestestableRepos = mutableListOf<String>()
+    private var digestDeployTime = Long.MAX_VALUE
+
+    init {
+        updateDigestDeployTime()
+        updateDigestibleRepos()
+    }
+
+    private fun updateDigestDeployTime() {
+        val digestDeployTimeEnvVariable = System.getenv("ignoreIssuesBeforeEpochMillis").toLongOrNull()
+        if (digestDeployTimeEnvVariable == null) {
+            log.debug("Digest", "No digestDeployTime env variable set, ignoring all issues.")
+            return
+        }
+        digestDeployTime = digestDeployTimeEnvVariable
+        log.debug("Digest", "Set deploy time is $digestDeployTime. Ignoring all issues before deploy time.")
+    }
+
+    private fun updateDigestibleRepos() {
+        val digestReposVariable = System.getenv("digestRepos")
+        if (digestReposVariable == null) {
+            log.debug("Digest", "No digestRepos env variable set.")
+            return
+        }
+        val digestestableReposString = digestReposVariable.replace(Regex("/\\s/g"), "")
+        if (digestestableReposString.isEmpty()) {
+            log.debug("Digest", "DigestRepos is empty")
+            return
+        }
+        log.debug("Digest", "Digestable repositories are $digestestableReposString")
+        digestestableRepos.addAll(digestestableReposString.split(","))
+    }
 
     private val digestEventsHelpers = listOf(
         MilestoneEventHelper(), LabelEventHelper(), ClosedEventHelper()
