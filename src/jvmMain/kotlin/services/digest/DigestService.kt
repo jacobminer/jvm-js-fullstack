@@ -2,6 +2,7 @@ package services.digest
 
 import Constants
 import client.GithubClient
+import kotlinx.serialization.Serializable
 import logging.log
 import models.*
 import services.digest.digest_helpers.ClosedEventHelper
@@ -9,6 +10,9 @@ import services.digest.digest_helpers.LabelEventHelper
 import services.digest.digest_helpers.MilestoneEventHelper
 import java.time.Duration
 import java.time.Instant
+
+@Serializable
+data class Repository(val issues_url: String, val name: String, val has_issues: Boolean? = null)
 
 object DigestService {
     private val digestestableRepos = mutableListOf<String>()
@@ -20,7 +24,7 @@ object DigestService {
     }
 
     private fun updateDigestDeployTime() {
-        val digestDeployTimeEnvVariable = System.getenv("ignoreIssuesBeforeEpochMillis").toLongOrNull()
+        val digestDeployTimeEnvVariable = System.getenv("ignoreIssuesBeforeEpochMillis")?.toLongOrNull()
         if (digestDeployTimeEnvVariable == null) {
             log.debug("Digest", "No digestDeployTime env variable set, ignoring all issues.")
             return
@@ -59,10 +63,87 @@ object DigestService {
         digestIssue(issue)
     }
 
-    suspend fun debugDigestRepo(url: String) {
+    suspend fun debugDigestRepo(repoUrl: String) {
+        log.debug("Digest", "Downloading repo from $repoUrl")
+        val repo = GithubClient.getFromUrl<Repository>(repoUrl)
+        if (repo == null) {
+            log.debug("Digest", "Failed to download repo")
+            return
+        }
+        digestRepo(repo)
     }
 
-    suspend fun debugDigestAllRepos(url: String) {
+    suspend fun debugDigestAllRepos(userUrl: String) {
+        log.debug("Digest", "Downloading repos from $userUrl")
+        digestAllEnabledRepos(userUrl)
+    }
+
+    private suspend fun digestAllEnabledRepos(userUrl: String) {
+        updateDigestibleRepos()
+
+        if (digestestableRepos.isEmpty()) {
+            log.debug("Digest", "Not digesting any repos.")
+            return
+        }
+
+        log.debug("Digest", "Digesting repos for user: $userUrl")
+        getRepoWithIssues(userUrl)
+            .filter { repo -> digestestableRepos.any { it == repo.name } }
+            .forEach {
+                log.debug("Digest", "Digesting repo ${it.name}")
+                digestRepo(it)
+            }
+    }
+
+    private suspend fun digestRepo(repo: Repository) {
+        // also add the state=all in order to get closed issues
+        val allIssuesUrl = repo.issues_url.replace("{/number}", "?state=all")
+        log.debug("Digest", "Getting valid XP issues for ${repo.name}")
+        val issues = getValidXpIssuesForRepo(allIssuesUrl)
+        log.debug("Digest", "Got ${issues.count()} XP issues from ${repo.name}")
+        for (issue in issues) {
+            digestIssue(issue)
+        }
+    }
+
+    private suspend fun getValidXpIssuesForRepo(issuesUrl: String): List<Issue> {
+        updateDigestDeployTime()
+        val issues = GithubClient.getFromUrl<List<Issue>>("$issuesUrl&per_page=10000")
+        if (issues == null) {
+            log.debug("Digest", "No issues available")
+            return listOf()
+        }
+
+        log.debug("Digest", "Got ${issues.count()} issues total")
+        return issues.filter {
+            // filter out issues missing the xp- label and issues that haven't been updated in over 24 hours.
+            val hasXpLabel = it.labels.firstOrNull { label ->
+                val includesLabel = label.name.contains(Constants.labelIdentifier)
+                val lastUpdateDate = Instant.parse(it.updated_at)
+                val afterDeployDate = isAfterDeployDate(lastUpdateDate)
+                if (includesLabel) {
+                    log.debug("Digest", "Last update date = $lastUpdateDate")
+                    log.debug("Digest", "After deploy date = $afterDeployDate")
+                }
+                includesLabel && afterDeployDate
+            }
+            hasXpLabel != null
+        }
+    }
+
+    private fun isAfterDeployDate(lastUpdateDate: Instant): Boolean {
+        return lastUpdateDate.toEpochMilli() >= digestDeployTime
+    }
+
+    private suspend fun getRepoWithIssues(userUrl: String): List<Repository> {
+        val repoList = GithubClient.getFromUrl<List<Repository>>("$userUrl/repos?per_page=1000")
+        if (repoList == null) {
+            log.debug("Digest", "No repositories available")
+            return listOf()
+        }
+
+        // filter out repos that don't have issues
+        return repoList.filter { it.has_issues == true }
     }
 
     private suspend fun digestIssue(issue: Issue) {

@@ -9,4 +9,5 @@ data class Issue(
     val body: String,
     val url: String,
     val labels: List<Label>,
-    val comments_url: String)
+    val comments_url: String,
+    val updated_at: String? = null)
