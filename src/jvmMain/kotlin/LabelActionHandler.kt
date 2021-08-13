@@ -10,8 +10,8 @@ data class NewIssue(val title: String?, val body: String)
 class LabelActionHandler(private val labelIdentifier: String) {
     // Make sure you pass in the `url` not the `html_url`!
     private fun getCrossPostingRepoApiUrl(issueUrl: String, repoName: String): String {
-        val currentRepoComponents = issueUrl.split("/")
-        val otherRepoComponents = currentRepoComponents.slice(0..currentRepoComponents.count() - 3)
+        val currentRepoComponents = issueUrl.split("/", ignoreCase = true, limit = 100)
+        val otherRepoComponents = currentRepoComponents.slice(0 until currentRepoComponents.count() - 3)
         val otherRepo = otherRepoComponents.joinToString("/") + "/" + repoName
         return otherRepo
     }
@@ -45,7 +45,7 @@ class LabelActionHandler(private val labelIdentifier: String) {
             body = "Automatically generated from " + issue.html_url + "\n\n" + issue.body
         )
 
-        val otherRepoUrl = this.getCrossPostingRepoApiUrl(issue.url, otherRepoName) + "/issues"
+        val otherRepoUrl = getCrossPostingRepoApiUrl(issue.url, otherRepoName) + "/issues"
         GithubClient.postToUrl(Json.encodeToString(newIssue), otherRepoUrl)
         println("LabelActionHandler: Created a new issue in $otherRepoName")
         call.respondText { "yay" }
