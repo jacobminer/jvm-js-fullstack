@@ -1,6 +1,10 @@
 import io.ktor.application.*
 import io.ktor.response.*
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
+@Serializable
 data class NewIssue(val title: String?, val body: String)
 
 class LabelActionHandler(private val labelIdentifier: String) {
@@ -42,7 +46,7 @@ class LabelActionHandler(private val labelIdentifier: String) {
         )
 
         val otherRepoUrl = this.getCrossPostingRepoApiUrl(issue.url, otherRepoName) + "/issues"
-        GithubClient.postToUrl(newIssue, otherRepoUrl)
+        GithubClient.postToUrl(Json.encodeToString(newIssue), otherRepoUrl)
         println("LabelActionHandler: Created a new issue in $otherRepoName")
         call.respondText { "yay" }
     }
