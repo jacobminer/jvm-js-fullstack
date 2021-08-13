@@ -11,12 +11,7 @@ import routing.webhookRoute
 fun main() {
     embeddedServer(Netty, System.getenv("PORT").toInt()) {
         install(ContentNegotiation) {
-            json(Json {
-                prettyPrint = true
-                isLenient = true
-                ignoreUnknownKeys = true
-                encodeDefaults = false
-            })
+            json(JsonConfig.json)
         }
         routing {
             webhookRoute()

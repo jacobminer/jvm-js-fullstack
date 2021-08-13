@@ -13,13 +13,14 @@ import models.Issue
 import models.Label
 import models.TimelineItem
 
-
 object GithubClient {
     private lateinit var _client: HttpClient
     fun getClient(): HttpClient {
         if (!this::_client.isInitialized) {
             _client = HttpClient(CIO) {
-                install(JsonFeature) { serializer = KotlinxSerializer() }
+                install(JsonFeature) {
+                    serializer = KotlinxSerializer(JsonConfig.json)
+                }
             }
         }
         return _client
@@ -53,6 +54,7 @@ object GithubClient {
                 }
             }
         } catch (e: Exception) {
+            e.printStackTrace()
             null
         }
     }

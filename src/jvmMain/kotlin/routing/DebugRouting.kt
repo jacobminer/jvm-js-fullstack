@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 import routing.handler.DebugActionHandler
 
 @Serializable
-data class DebugRequest(val action: String, val url: String?)
+data class DebugRequest(val url: String?)
 
 fun Route.debugRoute() {
     val debugActionHandler = DebugActionHandler()
