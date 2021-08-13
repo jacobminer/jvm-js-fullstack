@@ -3,7 +3,6 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import kotlinx.serialization.Serializable
-import java.net.http.HttpRequest
 
 @Serializable
 data class Label(val name: String)
