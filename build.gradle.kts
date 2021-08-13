@@ -36,6 +36,8 @@ kotlin {
                 implementation("io.ktor:ktor-server-core:$ktorVersion")
                 implementation("io.ktor:ktor-server-netty:$ktorVersion")
                 implementation("ch.qos.logback:logback-classic:$logbackVersion")
+                implementation("io.ktor:ktor-client-core:1.6.2")
+                implementation("io.ktor:ktor-client-cio:1.6.2")
             }
         }
     }
