@@ -11,6 +11,14 @@ import io.ktor.server.netty.*
 
 fun main() {
     embeddedServer(Netty, 9090) {
+        install(ContentNegotiation) {
+            json(Json {
+                prettyPrint = true
+                isLenient = true
+                ignoreUnknownKeys = true
+                encodeDefaults = false
+            })
+        }
         routing {
             get("/hello") {
                 call.respondText("Hello, API!")
