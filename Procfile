@@ -1,0 +1,1 @@
+web: ./build/install/xp-bot/bin/xp-bot
