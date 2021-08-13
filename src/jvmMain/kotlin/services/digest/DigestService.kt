@@ -23,6 +23,10 @@ object DigestService {
         updateDigestibleRepos()
     }
 
+    suspend fun beginDigest() {
+        digestAllEnabledRepos(System.getenv("ORG_API_LINK"))
+    }
+
     private fun updateDigestDeployTime() {
         val digestDeployTimeEnvVariable = System.getenv("ignoreIssuesBeforeEpochMillis")?.toLongOrNull()
         if (digestDeployTimeEnvVariable == null) {
