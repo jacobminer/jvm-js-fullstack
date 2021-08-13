@@ -24,10 +24,6 @@ fun Route.webhookRoute() {
         return true
     }
 
-    post("/webhookTest") {
-        val request = call.receive<String>()
-        println(request)
-    }
     post("/webhook") {
         if (!verifyGitHub(call.request)) {
             call.respondText { "Ignoring because GitHub auth failed" }
