@@ -11,7 +11,7 @@ import io.ktor.server.netty.*
 import kotlinx.serialization.json.Json
 
 fun main() {
-    embeddedServer(Netty, 9090) {
+    embeddedServer(Netty, 80) {
         install(ContentNegotiation) {
             json(Json {
                 prettyPrint = true
