@@ -123,7 +123,7 @@ object DigestService {
         // loop through comments array, adding custom object date
         for (comment in comments) {
             val commenterName = comment.user.login
-            val commentText = "$commenterName commented:\n> ${comment.body}\r\n`"
+            val commentText = "$commenterName commented:\n> ${comment.body}\r\n"
 
             val digestComment = DigestComment(
                 body = commentText,
@@ -177,7 +177,7 @@ object DigestService {
     private suspend fun getCrossPostedCommentsFromIssue(sourceIssueUrl: String): List<Comment>? {
         log.debug("Digest", "Getting cross posted comment for issue $sourceIssueUrl")
         val url = GithubClient.getCrossPostedIssueUrl(sourceIssueUrl) ?: return null
-        val comments = GithubClient.getFromUrl<List<Comment>>(url)
+        val comments = GithubClient.getFromUrl<List<Comment>>("$url/comments")
         if (comments == null) {
             log.debug("Digest", "Comments are undefined")
             return listOf()

@@ -3,11 +3,13 @@ package client
 import Constants
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
+import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import io.ktor.client.features.json.serializer.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import kotlinx.serialization.Serializable
 import logging.log
 import models.Issue
 import models.Label
@@ -29,15 +31,29 @@ object GithubClient {
     fun getUserAgent() = "steamclockkmp-bot"
     fun getToken() = "token ${System.getenv("crossplat")}"
 
-    suspend fun <T: Any> postToUrl(url: String, content: T): HttpResponse {
+    suspend fun <T: Any> postToUrl(url: String, content: T): HttpResponse? {
         println("postToUrl: Calling POST to $url")
-        return getClient().post(url) {
-            contentType(ContentType.Application.Json)
-            body = content
-            headers {
-                append("User-Agent", getUserAgent())
-                append("Authorization", getToken())
+        return try {
+            getClient().post(url) {
+                contentType(ContentType.Application.Json)
+                body = content
+                headers {
+                    append("User-Agent", getUserAgent())
+                    append("Authorization", getToken())
+                }
             }
+        } catch (e: Exception) {
+            val string = getClient().post<String>(url) {
+                contentType(ContentType.Application.Json)
+                body = content
+                headers {
+                    append("User-Agent", getUserAgent())
+                    append("Authorization", getToken())
+                }
+            }
+            log.debug("GithubClient", string)
+            e.printStackTrace()
+            null
         }
     }
 
@@ -54,13 +70,23 @@ object GithubClient {
                 }
             }
         } catch (e: Exception) {
+            val string = getClient().get<String>(issueUrl) {
+                contentType(ContentType.Application.Json)
+                headers {
+                    if (acceptHeader != null)
+                        append("Accept", acceptHeader)
+                    append("User-Agent", getUserAgent())
+                    append("Authorization", getToken())
+                }
+            }
+            log.debug("GithubClient", string)
             e.printStackTrace()
             null
         }
     }
 
     suspend fun getTimeline(issueUrl: String): List<TimelineItem>? {
-        val timelineItems = getFromUrl<List<TimelineItem>>(issueUrl, "application/vnd.github.mockingbird-preview")
+        val timelineItems = getFromUrl<List<TimelineItem>>("$issueUrl/timeline", "application/vnd.github.mockingbird-preview")
         if (timelineItems == null) {
             log.debug("GithubNetworkingHelper", "No timeline items found")
             return null
@@ -120,8 +146,11 @@ object GithubClient {
             return message
         }
         log.debug("GithubNetworkingHelper", "Adding comment to $url")
-        postToUrl("{ body: $comment ]", "$url/comments")
+        postToUrl("$url/comments", NewComment(body = comment))
         log.debug("GithubNetworkingHelper", "Created a new comment in $repoName")
         return null
     }
 }
+
+@Serializable
+data class NewComment(val body: String)
