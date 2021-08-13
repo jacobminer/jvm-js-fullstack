@@ -1,9 +1,7 @@
 import io.ktor.application.*
 import io.ktor.response.*
-import kotlinx.serialization.Serializable
-
-@Serializable
-data class NewIssue(val title: String?, val body: String)
+import models.NewIssue
+import models.WebHookContent
 
 class LabelActionHandler(private val labelIdentifier: String) {
     // Make sure you pass in the `url` not the `html_url`!

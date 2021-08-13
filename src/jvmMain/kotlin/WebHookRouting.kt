@@ -2,16 +2,7 @@ import io.ktor.application.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import kotlinx.serialization.Serializable
-
-@Serializable
-data class Label(val name: String)
-
-@Serializable
-data class Issue(val title: String, val html_url: String, val body: String, val url: String)
-
-@Serializable
-data class WebHookContent(val action: String, val issue: Issue? = null, val label: Label?)
+import models.WebHookContent
 
 fun Route.webhookRoute() {
     val labelName = "xp-"
