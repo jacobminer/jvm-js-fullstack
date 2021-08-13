@@ -202,13 +202,12 @@ object DigestService {
 
             log.debug("Digest", "get from url: $lastChangeUrl")
             val changeJson = GithubClient.getFromUrl<Comment>(lastChangeUrl)
-            val change = changeJson
-            if (change == null) {
+            if (changeJson == null) {
                 log.debug("Digest", "Change undefined")
                 return
             }
 
-            val date = change.updated_at ?: change.created_at
+            val date = changeJson.updated_at ?: changeJson.created_at
             val lastDigestCommentDate = Instant.parse(date)
             val timelineChangeEvents = getRelevantTimelineEvents(issue, lastDigestCommentDate.toEpochMilli())
             val newComments = comments.filter {

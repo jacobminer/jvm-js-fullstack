@@ -3,6 +3,7 @@ package routing.handler
 import io.ktor.application.*
 import io.ktor.request.*
 import io.ktor.response.*
+import logging.log
 import routing.DebugRequest
 import services.digest.DigestService
 
@@ -18,13 +19,13 @@ class DebugActionHandler {
 
         val url = payload.url
         if (url.contains("issues")) {
-            println("DebugRouter: Handling issue action")
+            log.debug("DebugRouter", "Handling issue action")
             DigestService.debugDigestIssue(url)
         } else if (url.contains("repos")) {
-            println("DebugRouter: Handling repo action")
+            log.debug("DebugRouter", "Handling repo action")
             DigestService.debugDigestRepo(url)
         } else if (url.contains("users")) {
-            println("DebugRouter: Handling user action")
+            log.debug("DebugRouter", "Handling user action")
             DigestService.debugDigestAllRepos(url)
         }
         call.respondText { "yay!" }

@@ -32,7 +32,7 @@ object GithubClient {
     fun getToken() = "token ${System.getenv("crossplat")}"
 
     suspend fun <T: Any> postToUrl(url: String, content: T): HttpResponse? {
-        println("postToUrl: Calling POST to $url")
+        log.debug("postToUrl", "Calling POST to $url")
         return try {
             getClient().post(url) {
                 contentType(ContentType.Application.Json)

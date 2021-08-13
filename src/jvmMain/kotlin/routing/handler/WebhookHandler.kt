@@ -4,6 +4,7 @@ import client.GithubClient
 import io.ktor.application.*
 import io.ktor.request.*
 import io.ktor.response.*
+import logging.log
 import models.NewIssue
 import models.WebHookContent
 
@@ -23,28 +24,28 @@ class WebhookHandler {
         }
 
         val content = call.receive<WebHookContent>()
-        if (content.action != WebhookHandler.labelAction) {
+        if (content.action != labelAction) {
             val message = "Ignoring because action was ${content.action}, which is not supported."
-            println("WebHookRouter: $message")
+            log.debug("WebhookHandler", message)
             call.respondText { message }
             return
         }
 
-        println("WebHookRouter: Handling labeled action")
+        log.debug("WebhookHandler", "Handling labeled action")
 
         val issue = content.issue
         val label = content.label
 
         if (label == null) {
             val message = "Nil label"
-            println("routing.handler.LabelActionHandler: $message")
+            log.debug("WebhookHandler", message)
             call.respondText { message }
             return
         }
 
         if (!label.name.contains(labelIdentifier)) {
             val message = "Ignoring non xp- labels."
-            println("routing.handler.LabelActionHandler: $message")
+            log.debug("WebhookHandler", message)
             call.respondText { message }
             return
         }
@@ -62,13 +63,13 @@ class WebhookHandler {
 
         val otherRepoUrl = getCrossPostingRepoApiUrl(issue.url, otherRepoName) + "/issues"
         GithubClient.postToUrl(otherRepoUrl, newIssue)
-        println("routing.handler.LabelActionHandler: Created a new issue in $otherRepoName")
+        log.debug("WebhookHandler","Created a new issue in $otherRepoName")
         call.respondText { "yay" }
     }
 
     private fun verifyGitHub(req: ApplicationRequest): Boolean {
         if (req.header("user-agent")?.contains("GitHub-Hookshot") == false) {
-            println("WebHookRouter: User agent isn't GithHub-Hookshot")
+            log.debug("WebhookHandler","User agent isn't GithHub-Hookshot")
             return false
         }
 
