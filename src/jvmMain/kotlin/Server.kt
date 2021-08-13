@@ -8,6 +8,7 @@ import io.ktor.routing.*
 import io.ktor.serialization.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import kotlinx.serialization.json.Json
 
 fun main() {
     embeddedServer(Netty, 9090) {
@@ -23,6 +24,7 @@ fun main() {
             get("/hello") {
                 call.respondText("Hello, API!")
             }
+            webhookRoute()
         }
     }.start(wait = true)
 }
