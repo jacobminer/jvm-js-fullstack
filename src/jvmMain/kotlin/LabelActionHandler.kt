@@ -1,8 +1,6 @@
 import io.ktor.application.*
 import io.ktor.response.*
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
 @Serializable
 data class NewIssue(val title: String?, val body: String)
