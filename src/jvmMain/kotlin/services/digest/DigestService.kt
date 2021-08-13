@@ -4,14 +4,19 @@ import Constants
 import client.GithubClient
 import logging.log
 import models.*
+import services.digest.digest_helpers.ClosedEventHelper
+import services.digest.digest_helpers.LabelEventHelper
+import services.digest.digest_helpers.MilestoneEventHelper
 import java.time.Duration
 import java.time.Instant
 
 object DigestService {
 //    private digestestableRepos: string[] = []
 //    private digestDeployTime = Number.MAX_SAFE_INTEGER
-//
-    private val digestEventsHelpers = listOf<DigestEventHelper>()
+
+    private val digestEventsHelpers = listOf(
+        MilestoneEventHelper(), LabelEventHelper(), ClosedEventHelper()
+    )
 
     suspend fun debugDigestIssue(issueUrl: String) {
         log.debug("Digest", "Downloading issue from $issueUrl")
