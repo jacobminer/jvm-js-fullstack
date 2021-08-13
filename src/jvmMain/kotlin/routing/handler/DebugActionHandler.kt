@@ -4,7 +4,7 @@ import io.ktor.application.*
 import io.ktor.request.*
 import io.ktor.response.*
 import routing.DebugRequest
-import services.DigestService
+import services.digest.DigestService
 
 class DebugActionHandler {
     suspend fun handleDebugAction(call: ApplicationCall) {

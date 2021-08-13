@@ -1,4 +1,4 @@
-package services
+package services.digest
 
 import Constants
 import client.GithubClient
@@ -7,14 +7,7 @@ import models.*
 import java.time.Duration
 import java.time.Instant
 
-interface DigestEventHelper {
-    fun handleTimelineEvents(events: List<TimelineItem>): List<TimelineItem>
-    fun createChangeComment(changeEvent: TimelineItem): DigestComment?
-}
-
 object DigestService {
-//    private githubNetworkingHelper: GithubNetworkingHelper
-//
 //    private digestestableRepos: string[] = []
 //    private digestDeployTime = Number.MAX_SAFE_INTEGER
 //
@@ -28,7 +21,7 @@ object DigestService {
             return
         }
         log.debug("Digest", "Downloaded issue.")
-        this.digestIssue(issue)
+        digestIssue(issue)
     }
 
     suspend fun debugDigestRepo(url: String) {
@@ -97,7 +90,7 @@ object DigestService {
                 val time = Instant.parse(it.updated_at)
                 isTimeWithin24Hours(time) && isAfterDate(time, lastDigestCommentDate.toEpochMilli())
             }
-            this.postDigest(issue, xpLabel, newComments, timelineChangeEvents)
+            postDigest(issue, xpLabel, newComments, timelineChangeEvents)
         }
     }
 

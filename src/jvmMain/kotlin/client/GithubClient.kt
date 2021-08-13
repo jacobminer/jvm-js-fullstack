@@ -43,15 +43,6 @@ object GithubClient {
                 }
             }
         } catch (e: Exception) {
-            val string = getClient().post<String>(url) {
-                contentType(ContentType.Application.Json)
-                body = content
-                headers {
-                    append("User-Agent", getUserAgent())
-                    append("Authorization", getToken())
-                }
-            }
-            log.debug("GithubClient", string)
             e.printStackTrace()
             null
         }
@@ -70,16 +61,6 @@ object GithubClient {
                 }
             }
         } catch (e: Exception) {
-            val string = getClient().get<String>(issueUrl) {
-                contentType(ContentType.Application.Json)
-                headers {
-                    if (acceptHeader != null)
-                        append("Accept", acceptHeader)
-                    append("User-Agent", getUserAgent())
-                    append("Authorization", getToken())
-                }
-            }
-            log.debug("GithubClient", string)
             e.printStackTrace()
             null
         }
@@ -102,9 +83,7 @@ object GithubClient {
 
         // get the reference to issue B for issue A
         for (timelineItem in timelineItems) {
-            if (timelineItem.actor?.login != "steamclock-bot") {
-                continue
-            }
+            if (timelineItem.actor?.login != "steamclock-bot") continue
 
             if (timelineItem.source == null) {
                 log.debug("GithubNetworkingHelper", "source is undefined")
@@ -151,4 +130,3 @@ object GithubClient {
         return null
     }
 }
-
