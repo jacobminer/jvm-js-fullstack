@@ -56,7 +56,7 @@ object DigestService {
         val crossPostedComments = getCrossPostedCommentsFromIssue(issue.url)
 
         // find the last comment including the digest identifier
-        val lastDigestComment = crossPostedComments?.lastOrNull { it.body.contains(Constants.digestIdentifier) }
+        val lastDigestComment = crossPostedComments?.lastOrNull { it.body?.contains(Constants.digestIdentifier) == true }
 
         if (lastDigestComment == null) {
             log.debug("Digest", "No previous digest comments")
@@ -73,11 +73,16 @@ object DigestService {
             // get the last issue referenced in the digest event
 
             // handle digest legacy comments
-            val lastChangeUrl = if (lastDigestComment.body.contains("Last change:")) {
+            val lastChangeUrl = if (lastDigestComment.body?.contains("Last change:") == true) {
                 log.debug("Digest", "Using last change url legacy parsing")
                 lastDigestComment.body.split("Last change: ")[1]
             } else {
                 getUrlFromLastDigestComment(lastDigestComment)
+            }
+
+            if (lastChangeUrl == null) {
+                log.debug("DigestService", "Didn't find last change url")
+                return
             }
 
             log.debug("Digest", "get from url: $lastChangeUrl")
@@ -99,10 +104,10 @@ object DigestService {
         }
     }
 
-    private fun getUrlFromLastDigestComment(lastComment: Comment): String {
+    private fun getUrlFromLastDigestComment(lastComment: Comment): String? {
         // last comment should contain "[xp-daily-digest](https://api.github.com/repos/jacobminer/A/issues/events/1943945073)\r\nOTHER CONTENT HERE"
         // split out into two parts based on xp-daily-digest]
-        val parts = lastComment.body.split("[${Constants.digestIdentifier}]")
+        val parts = lastComment.body?.split("[${Constants.digestIdentifier}]") ?: return null
         // grab only the end part (https://api.github.com/repos/jacobminer/A/issues/events/1943945073)\r\nOTHER CONTENT HERE
         val urlComponent = parts[1]
         // remove first bracket https://api.github.com/repos/jacobminer/A/issues/events/1943945073)\r\nOTHER CONTENT HERE
@@ -110,7 +115,7 @@ object DigestService {
         // Split into two parts based on )
         val linkAndContent = startOfLink.split(")")
         // Grab the second part, which should only be the link https://api.github.com/repos/jacobminer/A/issues/events/1943945073
-        val link = linkAndContent[0].toString()
+        val link = linkAndContent[0]
         // trim for good measure
         return link.trim()
     }
@@ -120,7 +125,7 @@ object DigestService {
 
         // loop through comments array, adding custom object date
         for (comment in comments) {
-            val commenterName = comment.user.login
+            val commenterName = comment.user?.login ?: continue
             val commentText = "$commenterName commented:\n> ${comment.body}\r\n"
 
             val digestComment = DigestComment(

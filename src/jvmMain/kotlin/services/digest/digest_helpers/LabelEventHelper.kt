@@ -13,10 +13,11 @@ class LabelEventHelper: DigestEventHelper("label", listOf("labeled", "unlabeled"
         val addedText = actorName + " added label **${labelName}**\r\n"
         val removedText = actorName + " removed label **${labelName}**\r\n"
         val changeText = if (labelChangeEvent.event == "labeled") addedText else removedText
+        val url = labelChangeEvent.url ?: return null
         return DigestComment(
             body = changeText,
             date = Instant.parse(labelChangeEvent.created_at),
-            url = labelChangeEvent.url
+            url = url
         )
     }
 }

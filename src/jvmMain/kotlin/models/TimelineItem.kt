@@ -9,7 +9,7 @@ data class TimelineItem(
     val created_at: String,
     var changeType: String? = null,
     val event: String? = null,
-    val url: String,
+    val url: String? = null,
     val milestone: Milestone? = null,
     val label: Label? = null
 )

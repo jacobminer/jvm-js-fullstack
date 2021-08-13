@@ -3,4 +3,10 @@ package models
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Comment(val body: String, val user: Actor, val url: String, val updated_at: String?, val created_at: String)
+data class Comment(
+    val body: String? = null,
+    val user: Actor? = null,
+    val url: String,
+    val updated_at: String? = null,
+    val created_at: String
+)

@@ -12,10 +12,11 @@ class MilestoneEventHelper: DigestEventHelper("milestone", listOf("milestoned", 
         val addedText = actorName + " assigned milestone **${milestoneName}**\r\n"
         val removedText = actorName + " unassigned milestone **${milestoneName}**\r\n"
         val changeText = if (changeEvent.event == "milestoned") addedText else removedText
+        val url = changeEvent.url ?: return null
         return DigestComment(
             body = changeText,
             date = Instant.parse(changeEvent.created_at),
-            url = changeEvent.url
+            url = url
         )
     }
 }

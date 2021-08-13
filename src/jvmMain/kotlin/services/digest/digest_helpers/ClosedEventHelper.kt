@@ -10,10 +10,11 @@ class ClosedEventHelper: DigestEventHelper("closed", listOf("closed")) {
         val closedEvent = changeEvent
         val actorName = closedEvent.actor?.login ?: return null
         val changeText = "$actorName **closed** issue.\r\n"
+        val url = closedEvent.url ?: return null
         return DigestComment(
             body = changeText,
             date = Instant.parse(closedEvent.created_at),
-            url = closedEvent.url
+            url = url
         )
     }
 }
